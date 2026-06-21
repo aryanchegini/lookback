@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lookback"
+version = "0.1.0"
+description = "Point-in-time market data store + vectorised backtester"
+requires-python = ">=3.13"
+dependencies = [
+    "yfinance",
+    "pandas",
+    "numpy",
+    "pyarrow",
+    "matplotlib",
+]
+
+[project.optional-dependencies]
+dev = ["pytest"]
+
+[project.scripts]
+lookback = "lookback.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["lookback*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-q --strict-markers"
+filterwarnings = [
+    "error::DeprecationWarning",
+]
