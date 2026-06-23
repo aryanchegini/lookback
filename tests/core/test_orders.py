@@ -1,6 +1,9 @@
 from datetime import datetime
 
+import pytest
+
 from lookback.core.orders import Order, OrderSide, OrderType, OrderState
+from lookback.core.exceptions import InvalidStateTransitionError
 
 
 def _order():
@@ -17,3 +20,14 @@ def test_order_state_is_mutable():
     order = _order()
     order._state = OrderState.SUBMITTED
     assert order._state == OrderState.SUBMITTED
+    
+def test_legal_state_transition():
+    order = _order()
+    order.transition_to(OrderState.SUBMITTED)
+    assert order._state == OrderState.SUBMITTED
+    
+def test_illegal_state_transitions():
+    order = _order()
+    with pytest.raises(InvalidStateTransitionError):
+        order.transition_to(OrderState.FILLED)
+    
