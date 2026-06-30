@@ -7,3 +7,4 @@ cache/*.parquet
 
 # local planning notes — not for publication
 project_plan.md
+flow_demo.py
