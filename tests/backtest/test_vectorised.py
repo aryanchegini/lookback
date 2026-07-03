@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import pytest
 
 from lookback.backtest.vectorised import VectorisedBacktester
 from lookback.strategies.base import Strategy
@@ -61,6 +62,61 @@ def test_equity_matches_returns():
     )
     expected_equity = (1 + result.strategy_returns.fillna(0)).cumprod()
     pd.testing.assert_series_equal(result.equity_curve, expected_equity, check_names=False)
+
+
+class _AlwaysShort(Strategy):
+    @property
+    def name(self) -> str:
+        return "always_short"
+
+    def generate_signal(self, prices: pd.DataFrame) -> pd.Series:
+        return self._validate(pd.Series(-1.0, index=prices.index))
+
+
+def test_borrow_cost_only_hits_shorts():
+    prices = _synthetic()
+    short = VectorisedBacktester(borrow_bps=1000).run(_AlwaysShort(), prices)
+    long = VectorisedBacktester(borrow_bps=1000).run(_AlwaysLong(), prices)
+    # Long pays no borrow; short pays it every held bar.
+    assert (long.costs == 0).all()
+    assert (short.costs.iloc[2:] > 0).all()
+
+
+def test_borrow_cost_reduces_short_return():
+    prices = _synthetic()
+    free = VectorisedBacktester(borrow_bps=0).run(_AlwaysShort(), prices)
+    costly = VectorisedBacktester(borrow_bps=1000).run(_AlwaysShort(), prices)
+    assert costly.total_return < free.total_return
+
+
+class _Alternating(Strategy):
+    """Flip +1/-1 every bar -> maximum turnover -> maximum cost drag."""
+
+    @property
+    def name(self) -> str:
+        return "alternating"
+
+    def generate_signal(self, prices: pd.DataFrame) -> pd.Series:
+        n = len(prices)
+        vals = [1.0 if i % 2 else -1.0 for i in range(n)]
+        return self._validate(pd.Series(vals, index=prices.index))
+
+
+def test_costs_reduce_returns():
+    prices = _synthetic()
+    free = VectorisedBacktester(cost_bps=0.0).run(_Alternating(), prices)
+    costly = VectorisedBacktester(cost_bps=10.0).run(_Alternating(), prices)
+    assert costly.total_return < free.total_return
+    assert (free.costs == 0).all()
+
+
+def test_single_entry_costs_one_trade():
+    prices = _synthetic()
+    result = VectorisedBacktester(cost_bps=10.0).run(_AlwaysLong(), prices)
+    # AlwaysLong trades once (flat -> long); cost = turnover(1) * 10bps.
+    nonzero = result.costs[result.costs != 0]
+    assert len(nonzero) == 1
+    assert nonzero.iloc[0] == pytest.approx(10.0 / 10_000)
 
 
 def test_backtest_is_backwards_looking():
