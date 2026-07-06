@@ -4,7 +4,7 @@ __pycache__/
 .pytest_cache/
 *.egg-info/
 cache/*.parquet
+.DS_Store
 
 # local planning notes — not for publication
 project_plan.md
-flow_demo.py

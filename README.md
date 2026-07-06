@@ -1,20 +1,24 @@
 # lookback
 
-A backtester for trading strategies, written in Python.
+A point-in-time market-data store and vectorised backtester for trading strategies, written in Python.
 
-`lookback` pulls historical market data, builds signals from it, runs a strategy over that data, and tells you how it would have done, with transaction costs and position sizing factored in. You can also sweep over a range of parameters to check whether a strategy is genuinely good or just got lucky on one setting.
+`lookback` pulls historical market data, builds signals from it, runs a strategy over that data, and tells you how it would have done — with transaction costs, short-borrow costs, and position sizing factored in. You can sweep over a range of parameters (in parallel, with resumable checkpoints) to check whether a strategy is genuinely good or just got lucky on one setting.
 
-The thing I most wanted to get right is that a strategy should never be able to see the future. Every data lookup is tied to an `as_of` date and only returns data up to that point, so there's no way to accidentally trade on information you wouldn't have had at the time. That kind of leak (look-ahead bias) is the usual reason a backtest looks great and then falls apart live, so I handle it in the data layer rather than relying on carefulness.
+The thing I most wanted to get right is that a strategy should never be able to see the future. Every data lookup is tied to an `as_of` date and only returns data up to that point, so there's no way to accidentally trade on information you wouldn't have had at the time. That kind of leak (look-ahead bias) is the usual reason a backtest looks great and then falls apart live, so it's handled structurally rather than by being careful: the whole pipeline is backwards-looking, and the one place a signal becomes a tradable position — a single `shift(1)` — lives in the backtester and nowhere else.
 
-## Design
+## How a backtest flows
 
-Some notes on how it's put together:
+```
+DataStore.get_bars(as_of)      point-in-time prices (never past as_of)
+   → Feature.compute           backwards-looking inputs (rolling stats)
+   → Strategy.generate_signal   an opinion per bar in {-1, 0, +1}
+   → Sizer.size                scale the opinion into a position size
+   → position = shift(1)       the one look-ahead guard: act at t+1
+   → × asset returns − costs   per-bar P&L, net of trade + borrow costs
+   → equity curve → metrics    Sharpe, drawdown, CAGR, win rate
+```
 
-- **Point-in-time data store** — every market-data query is bounded by `as_of`, so the look-ahead guarantee comes from the data boundary itself instead of me remembering to be careful.
-- **Vectorised backtester** - the simulation is just a handful of aligned pandas operations. The fiddly part is the `shift()` so a signal at time *T* affects returns at *T+1* and not the same bar.
-- **Costs and sizing** — transaction costs (bps + fixed) and position sizing (fixed-fraction and vol-targeting) are built in, since a strategy that doesn't survive costs isn't worth much.
-- **ABCs vs Protocols** — features share behaviour, so `Feature` is an ABC; backtesters only share an interface, so `Backtester` is a `Protocol`.
-- **Domain model** — immutable, slotted `Bar` records so millions fit in memory, an `Order` lifecycle as an explicit state machine, and a small exception hierarchy so I can catch domain errors without swallowing real bugs.
+`BacktestBuilder` assembles a run fluently; `PortfolioBacktester` runs one strategy across many symbols and equal-weights them; the sweep repeats a run over a parameter grid.
 
 ## Getting started
 
@@ -34,16 +38,31 @@ Run the tests:
 pytest          # or: make test
 ```
 
+A one-call entry point over the subsystems:
+
+```python
+from lookback.facade import Lookback
+from lookback.strategies.crossover import MovingAverageCrossover
+
+lb = Lookback()
+result = lb.backtest(MovingAverageCrossover(20, 50), prices, cost_bps=5)
+print(result.summary())        # Sharpe, drawdown, CAGR, win rate
+```
+
 ## Layout
 
 ```
 lookback/
-├── core/         # exceptions, instruments, orders, events, time helpers
-├── data/         # data sources + point-in-time store + caching
-├── features/     # derived signals (returns, vol, moving averages, ...)
-├── strategies/   # trading strategies
-├── backtest/     # vectorised backtester, costs, sizing, metrics
-└── sweep/        # parallel parameter sweeps
+├── core/         # exceptions, instruments (Bar), orders (state machine)
+├── data/         # data sources, point-in-time store, partitioned parquet cache
+├── features/     # derived signals (returns, vol, moving averages, zscore, momentum)
+├── strategies/   # trading strategies (crossover, mean-reversion, vol-breakout)
+├── sizing/       # position sizers + validating descriptors + factory
+├── backtest/     # vectorised backtester, cost models, metrics, builder, portfolio
+├── sweep/        # lazy param grid + vanilla and parallel/resumable runners
+├── events/       # weakref EventBus (Observer)
+├── utils/        # decorators (timing, memoisation)
+└── facade.py     # one-call front end over the subsystems
 ```
 
 ## Tech stack

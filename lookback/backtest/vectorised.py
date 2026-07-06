@@ -1,5 +1,11 @@
 import pandas as pd
 
+from lookback.backtest.costs import (
+    BorrowCost,
+    CompositeCost,
+    CostModel,
+    PerTradeCost,
+)
 from lookback.backtest.result import BacktestResult
 from lookback.sizing.base import Sizer
 from lookback.strategies.base import Strategy
@@ -13,10 +19,16 @@ class VectorisedBacktester:
     """
 
     def __init__(self, cost_bps: float = 0.0, sizer: Sizer | None = None,
-                 borrow_bps: float = 0.0):
-        self.cost_bps = cost_bps
+                 borrow_bps: float = 0.0, cost_model: CostModel | None = None):
         self.sizer = sizer
-        self.borrow_bps = borrow_bps  # annual cost of holding a short
+        # A CostModel can be supplied directly; otherwise build one from the
+        # bps convenience args (per-trade + borrow), keeping behaviour identical.
+        if cost_model is not None:
+            self.cost_model = cost_model
+        else:
+            self.cost_model = CompositeCost(
+                [PerTradeCost(cost_bps), BorrowCost(borrow_bps)]
+            )
 
     def run(self, strategy: Strategy, prices: pd.DataFrame) -> BacktestResult:
         signal = strategy.generate_signal(prices)
@@ -31,16 +43,7 @@ class VectorisedBacktester:
         asset_returns = prices["close"].pct_change()
         gross_returns = position * asset_returns
 
-        # Costs hit on turnover (how much the position changed). Warm-up
-        # treated as flat, so the first real entry counts as one trade.
-        turnover = position.fillna(0).diff().abs().fillna(0)
-        trade_cost = turnover * (self.cost_bps / 10_000)
-
-        # Borrow cost: a holding fee charged every bar a short is open.
-        short_exposure = position.clip(upper=0).abs().fillna(0)
-        borrow_cost = short_exposure * (self.borrow_bps / 10_000 / 252)
-
-        costs = trade_cost + borrow_cost
+        costs = self.cost_model.compute(position)
 
         strategy_returns = gross_returns - costs
         equity_curve = (1 + strategy_returns.fillna(0)).cumprod()
