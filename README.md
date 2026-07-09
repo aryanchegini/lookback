@@ -53,7 +53,7 @@ print(result.summary())        # Sharpe, drawdown, CAGR, win rate
 
 ```
 lookback/
-├── core/         # exceptions, instruments (Bar), orders (state machine)
+├── core/         # exception hierarchy
 ├── data/         # data sources, point-in-time store, partitioned parquet cache
 ├── features/     # derived signals (returns, vol, moving averages, zscore, momentum)
 ├── strategies/   # trading strategies (crossover, mean-reversion, vol-breakout)
