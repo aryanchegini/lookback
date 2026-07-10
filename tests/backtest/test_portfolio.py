@@ -3,7 +3,7 @@ import pandas as pd
 import pytest
 
 from lookback.backtest.portfolio import PortfolioBacktester
-from lookback.core.exceptions import InsufficientDataError
+from lookback.exceptions import InsufficientDataError
 from lookback.strategies.crossover import MovingAverageCrossover
 
 

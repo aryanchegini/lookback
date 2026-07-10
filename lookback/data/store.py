@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 
 from lookback.data.cache import ParquetCache
 from lookback.data.source import DataSource
-from lookback.core.exceptions import InsufficientDataError
+from lookback.exceptions import InsufficientDataError
 
 
 class DataStore:

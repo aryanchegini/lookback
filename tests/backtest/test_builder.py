@@ -4,7 +4,7 @@ import pytest
 
 from lookback.backtest.builder import BacktestBuilder
 from lookback.backtest.vectorised import VectorisedBacktester
-from lookback.core.exceptions import ConfigurationError
+from lookback.exceptions import ConfigurationError
 from lookback.sizing import VolTarget
 from lookback.strategies.crossover import MovingAverageCrossover
 

@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from lookback.core.exceptions import ConfigurationError
+from lookback.exceptions import ConfigurationError
 from lookback.sizing import FixedFraction, Sizer, VolTarget, make_sizer
 from lookback.sizing.descriptors import Fraction01, PositiveInt
 

@@ -5,7 +5,7 @@ import pandas as pd
 from lookback.backtest.metrics import cagr, max_drawdown, sharpe_ratio, win_rate
 from lookback.backtest.result import BacktestResult
 from lookback.backtest.vectorised import VectorisedBacktester
-from lookback.core.exceptions import InsufficientDataError
+from lookback.exceptions import InsufficientDataError
 from lookback.strategies.base import Strategy
 
 

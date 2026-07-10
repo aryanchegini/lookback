@@ -5,7 +5,7 @@ import pytest
 
 from lookback.data.source import DataSource
 from lookback.data.store import DataStore
-from lookback.core.exceptions import InsufficientDataError
+from lookback.exceptions import InsufficientDataError
 
 
 class _FakeSource(DataSource):

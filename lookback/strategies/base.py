@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 
 import pandas as pd
 
-from lookback.core.exceptions import InvalidSignalError
+from lookback.exceptions import InvalidSignalError
 
 _VALID = {-1, 0, 1}
 

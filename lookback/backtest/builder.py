@@ -2,7 +2,7 @@ import pandas as pd
 
 from lookback.backtest.result import BacktestResult
 from lookback.backtest.vectorised import VectorisedBacktester
-from lookback.core.exceptions import ConfigurationError
+from lookback.exceptions import ConfigurationError
 from lookback.sizing.base import Sizer, make_sizer
 from lookback.strategies.base import Strategy
 

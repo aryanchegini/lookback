@@ -9,7 +9,7 @@ import pandas as pd
 from lookback.backtest.portfolio import PortfolioBacktester, PortfolioResult
 from lookback.backtest.result import BacktestResult
 from lookback.backtest.vectorised import VectorisedBacktester
-from lookback.core.exceptions import ConfigurationError
+from lookback.exceptions import ConfigurationError
 from lookback.data.cache import ParquetCache
 from lookback.data.source import DataSource
 from lookback.data.store import DataStore

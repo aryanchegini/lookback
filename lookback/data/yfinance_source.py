@@ -4,7 +4,7 @@ import pandas as pd
 import yfinance as yf
 
 from lookback.data.source import DataSource
-from lookback.core.exceptions import SymbolNotFoundError, DataError
+from lookback.exceptions import SymbolNotFoundError, DataError
 
 
 class YFinanceSource(DataSource):

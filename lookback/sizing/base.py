@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 
 import pandas as pd
 
-from lookback.core.exceptions import ConfigurationError
+from lookback.exceptions import ConfigurationError
 
 
 class Sizer(ABC):
