@@ -23,19 +23,10 @@ class PortfolioResult:
         return float(self.equity_curve.iloc[-1] - 1.0)
 
     def summary(self) -> dict[str, float]:
-        return {
-            "total_return": self.total_return,
-            "cagr": cagr(self.equity_curve),
-            "sharpe": sharpe_ratio(self.portfolio_returns),
-            "max_drawdown": max_drawdown(self.equity_curve),
-            "win_rate": win_rate(self.portfolio_returns),
-        }
+        return {"total_return": self.total_return, "cagr": cagr(self.equity_curve), "sharpe": sharpe_ratio(self.portfolio_returns), "max_drawdown": max_drawdown(self.equity_curve), "win_rate": win_rate(self.portfolio_returns)}
 
     def __repr__(self) -> str:
-        return (
-            f"PortfolioResult({self.strategy_name}, "
-            f"symbols={len(self.per_symbol)}, total_return={self.total_return:.2%})"
-        )
+        return (f"PortfolioResult({self.strategy_name}, " f"symbols={len(self.per_symbol)}, total_return={self.total_return:.2%})")
 
 
 class PortfolioBacktester:
@@ -44,14 +35,12 @@ class PortfolioBacktester:
     def __init__(self, backtester: VectorisedBacktester | None = None):
         self.backtester = backtester or VectorisedBacktester()
 
-    def run(self, strategy: Strategy,
-            prices_by_symbol: dict[str, pd.DataFrame]) -> PortfolioResult:
+    def run(self, strategy: Strategy, prices_by_symbol: dict[str, pd.DataFrame]) -> PortfolioResult:
         if not prices_by_symbol:
             raise InsufficientDataError("no symbols provided")
 
         per_symbol = {
-            sym: self.backtester.run(strategy, prices)
-            for sym, prices in prices_by_symbol.items()
+            sym: self.backtester.run(strategy, prices) for sym, prices in prices_by_symbol.items()
         }
 
         # One column of strategy returns per symbol, aligned on the union index.
@@ -62,9 +51,4 @@ class PortfolioBacktester:
         portfolio_returns = returns.mean(axis=1)
         equity_curve = (1 + portfolio_returns.fillna(0)).cumprod()
 
-        return PortfolioResult(
-            strategy_name=strategy.name,
-            per_symbol=per_symbol,
-            portfolio_returns=portfolio_returns,
-            equity_curve=equity_curve,
-        )
+        return PortfolioResult(strategy_name=strategy.name, per_symbol=per_symbol, portfolio_returns=portfolio_returns, equity_curve=equity_curve)

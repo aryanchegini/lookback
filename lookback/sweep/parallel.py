@@ -20,8 +20,7 @@ def _param_hash(params: dict) -> str:
     return hashlib.sha1(blob).hexdigest()[:16]
 
 
-def _init_worker(build: Callable[..., Strategy], prices: pd.DataFrame,
-                 cost_bps: float) -> None:
+def _init_worker(build: Callable[..., Strategy], prices: pd.DataFrame, cost_bps: float) -> None:
     _WORKER["build"] = build
     _WORKER["prices"] = prices
     _WORKER["backtester"] = VectorisedBacktester(cost_bps=cost_bps)
@@ -54,10 +53,7 @@ def _collect(checkpoint_dir: Path, rank_by: str) -> pd.DataFrame:
     return df
 
 
-def run_sweep_parallel(build: Callable[..., Strategy], prices: pd.DataFrame,
-                       grid: Iterable[dict], checkpoint_dir: str | Path, *,
-                       cost_bps: float = 0.0, rank_by: str = "sharpe",
-                       processes: int | None = None) -> pd.DataFrame:
+def run_sweep_parallel(build: Callable[..., Strategy], prices: pd.DataFrame, grid: Iterable[dict], checkpoint_dir: str | Path, *, cost_bps: float = 0.0, rank_by: str = "sharpe", processes: int | None = None) -> pd.DataFrame:
     """Run a sweep across processes, checkpointing each result for resume.
 
     Re-running with the same checkpoint_dir skips already-finished combos and

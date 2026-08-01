@@ -27,16 +27,7 @@ class BacktestResult:
 
     def summary(self) -> dict[str, float]:
         """Risk-adjusted scorecard for this run."""
-        return {
-            "total_return": self.total_return,
-            "cagr": cagr(self.equity_curve),
-            "sharpe": sharpe_ratio(self.strategy_returns),
-            "max_drawdown": max_drawdown(self.equity_curve),
-            "win_rate": win_rate(self.strategy_returns),
-        }
+        return {"total_return": self.total_return, "cagr": cagr(self.equity_curve), "sharpe": sharpe_ratio(self.strategy_returns), "max_drawdown": max_drawdown(self.equity_curve), "win_rate": win_rate(self.strategy_returns)}
 
     def __repr__(self) -> str:
-        return (
-            f"BacktestResult({self.strategy_name}, "
-            f"bars={self.n_bars}, total_return={self.total_return:.2%})"
-        )
+        return (f"BacktestResult({self.strategy_name}, " f"bars={self.n_bars}, total_return={self.total_return:.2%})")

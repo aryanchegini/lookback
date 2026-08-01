@@ -7,9 +7,7 @@ from lookback.events.bus import EventBus
 from lookback.strategies.base import Strategy
 
 
-def run_sweep(build: Callable[..., Strategy], prices: pd.DataFrame,
-              grid: Iterable[dict], *, cost_bps: float = 0.0,
-              rank_by: str = "sharpe", bus: EventBus | None = None) -> pd.DataFrame:
+def run_sweep(build: Callable[..., Strategy], prices: pd.DataFrame, grid: Iterable[dict], *, cost_bps: float = 0.0, rank_by: str = "sharpe", bus: EventBus | None = None) -> pd.DataFrame:
     """Run one backtest per param combo; return a table ranked by `rank_by`.
 
     `build(**params)` maps a config dict to a Strategy. Combos that are

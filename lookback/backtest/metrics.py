@@ -4,8 +4,7 @@ import pandas as pd
 TRADING_DAYS = 252
 
 
-def sharpe_ratio(returns: pd.Series, periods_per_year: int = TRADING_DAYS,
-                 risk_free: float = 0.0) -> float:
+def sharpe_ratio(returns: pd.Series, periods_per_year: int = TRADING_DAYS, risk_free: float = 0.0) -> float:
     """Annualised return per unit of risk. risk_free is per-period."""
     excess = returns.dropna() - risk_free
     sd = excess.std(ddof=1)

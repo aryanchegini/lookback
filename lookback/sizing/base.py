@@ -25,7 +25,9 @@ class Sizer(ABC):
     def size(self, signal: pd.Series, prices: pd.DataFrame) -> pd.Series: ...
 
     def __repr__(self) -> str:
-        return f"{type(self).__name__}()"
+        # vars() holds the descriptors' private names (_fraction); show the public one.
+        params = ", ".join(f"{name.removeprefix('_')}={value!r}" for name, value in vars(self).items())
+        return f"{type(self).__name__}({params})"
 
 
 def make_sizer(key: str, **params) -> Sizer:

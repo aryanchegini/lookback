@@ -12,16 +12,7 @@ def _ohlcv(dates):
     idx = pd.to_datetime(dates)
     n = len(idx)
     close = np.arange(1.0, n + 1.0)
-    return pd.DataFrame(
-        {
-            "open": close,
-            "high": close + 1,
-            "low": close - 1,
-            "close": close,
-            "volume": close * 10,
-        },
-        index=idx,
-    )
+    return pd.DataFrame({"open": close, "high": close + 1, "low": close - 1, "close": close, "volume": close * 10}, index=idx)
 
 
 class _CountingSource(DataSource):

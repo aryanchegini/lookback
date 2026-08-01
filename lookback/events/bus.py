@@ -15,8 +15,8 @@ class EventBus:
         self._subscribers: dict[str, list] = {}
 
     def subscribe(self, event: str, callback: Callable) -> None:
-        # WeakMethod for bound methods (obj.handler), plain ref otherwise.
-        if hasattr(callback, "__self__"):
+        # WeakMethod for bound methods, plain ref otherwise.
+        if hasattr(callback, "__self__"): # is a bound method
             ref = weakref.WeakMethod(callback)
         else:
             ref = weakref.ref(callback)

@@ -18,8 +18,7 @@ class VectorisedBacktester:
     (position = signal.shift(1)), so no strategy can leak look-ahead bias.
     """
 
-    def __init__(self, cost_bps: float = 0.0, sizer: Sizer | None = None,
-                 borrow_bps: float = 0.0, cost_model: CostModel | None = None):
+    def __init__(self, cost_bps: float = 0.0, sizer: Sizer | None = None, borrow_bps: float = 0.0, cost_model: CostModel | None = None):
         self.sizer = sizer
         # A CostModel can be supplied directly; otherwise build one from the
         # bps convenience args (per-trade + borrow), keeping behaviour identical.
@@ -48,12 +47,4 @@ class VectorisedBacktester:
         strategy_returns = gross_returns - costs
         equity_curve = (1 + strategy_returns.fillna(0)).cumprod()
 
-        return BacktestResult(
-            strategy_name=strategy.name,
-            signal=signal,
-            position=position,
-            asset_returns=asset_returns,
-            costs=costs,
-            strategy_returns=strategy_returns,
-            equity_curve=equity_curve,
-        )
+        return BacktestResult(strategy_name=strategy.name, signal=signal, position=position, asset_returns=asset_returns, costs=costs, strategy_returns=strategy_returns, equity_curve=equity_curve)

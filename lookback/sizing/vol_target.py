@@ -2,7 +2,7 @@ import pandas as pd
 
 from lookback.features.volatility import RollingVolatility
 from lookback.sizing.base import Sizer
-from lookback.sizing.descriptors import Fraction01, PositiveInt
+from lookback.sizing.descriptors import Fraction01, PositiveFloat, PositiveInt
 
 
 class VolTarget(Sizer, key="vol_target"):
@@ -14,9 +14,9 @@ class VolTarget(Sizer, key="vol_target"):
 
     window = PositiveInt()
     target_vol = Fraction01()
+    max_leverage = PositiveFloat()
 
-    def __init__(self, target_vol: float = 0.15, window: int = 20,
-                 max_leverage: float = 3.0):
+    def __init__(self, target_vol: float = 0.15, window: int = 20, max_leverage: float = 3.0):
         self.target_vol = target_vol   # annualised, e.g. 0.15 = 15%
         self.window = window
         self.max_leverage = max_leverage

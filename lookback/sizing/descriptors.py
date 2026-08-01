@@ -34,3 +34,20 @@ class PositiveInt:
         if not isinstance(value, int) or isinstance(value, bool) or value <= 0:
             raise ValueError(f"{self._name[1:]} must be a positive int, got {value!r}")
         setattr(obj, self._name, value)
+
+
+class PositiveFloat:
+    """A float attribute constrained to > 0 (unbounded above)."""
+
+    def __set_name__(self, owner, name):
+        self._name = "_" + name
+
+    def __get__(self, obj, objtype=None):
+        if obj is None:
+            return self
+        return getattr(obj, self._name)
+
+    def __set__(self, obj, value):
+        if isinstance(value, bool) or not isinstance(value, (int, float)) or value <= 0:
+            raise ValueError(f"{self._name[1:]} must be a positive number, got {value!r}")
+        setattr(obj, self._name, float(value))
